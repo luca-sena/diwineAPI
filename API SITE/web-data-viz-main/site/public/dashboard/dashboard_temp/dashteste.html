@@ -24,7 +24,7 @@
                 </div>
 
                 <div class="base-temp">
-                    Temperatura Atual: 14°C
+                    Temperatura Atual: <span id="tempSpan"></span> °C
                 </div>
 
             </div>
@@ -114,39 +114,167 @@
 
 </html>
 <script>
+
+    window.onload = obterDadosGrafico();
+
+ function obterDadosGrafico() {
+
+
+    fetch(`/medidas/ultimas`, { cache: 'no-store' }).then(function (response) {
+            if (response.ok) {
+                response.json().then(function (resposta) {
+                    
+                    console.log(`Dados recebidos: ${JSON.stringify(resposta)}`);
+                    resposta.reverse();
+                    
+
+                    plotarGrafico(resposta);
+
+                });
+            } else {
+                console.error('Nenhum dado encontrado ou erro na API');
+            }
+        })
+            .catch(function (error) {
+                console.error(`Erro na obtenção dos dados p/ gráfico: ${error.message}`);
+            });
+}
+
+function plotarGrafico(resposta){
+
+    var temperatura =  resposta[0].temperatura
+
     const ctx = document.getElementById('myChartLine');
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['13h00', '13h30', '14h00', '14h30', '15h00', '15h30'],
-            datasets: [{
-                label: '',
+    let labels = [];
+    let data = [];
+
+
+    let dados = {
+        labels: labels,
+        datasets: [{
+            label: '',
                 backgroundColor: 'rgb(255, 0, 0)',
                 borderColor: 'rgb(255, 0, 0)',
-                data: [10, 11, 12, 10, 14],
+                data: [],
                 borderWidth: 4,
                 tension: 0.15
-            }]
-        },
-        options: {
-            responsive: true,
-            radius: 6,
-            plugins: {
-                legend: {
-                    labels: {
-                        boxWidth: 0
+        }]
+    }
+   
+    
 
-                    }
-                }
-            },
 
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
+    console.log('----------------------------------------------')
+        console.log('Estes dados foram recebidos pela funcao "obterDadosGrafico" e passados para "plotarGrafico":')
+        console.log(resposta)
+
+        // Inserindo valores recebidos em estrutura para plotar o gráfico
+        for (i = 0; i < resposta.length; i++) {
+            var registro = resposta[i];
+            labels.push(registro.momento_grafico);
+            // dados.datasets[0].data.push(registro.umidade);
+            dados.datasets[0].data.push(registro.temperatura);
         }
+
+        console.log('----------------------------------------------')
+        console.log('O gráfico será plotado com os respectivos valores:')
+        console.log('Labels:')
+        console.log(labels)
+        console.log('Dados:')
+        console.log(dados.datasets)
+        console.log('----------------------------------------------')
+
+        // Criando estrutura para plotar gráfico - config
+        const config = {
+            type: 'line',
+            data: dados,
+        };
+
+        // Adicionando gráfico criado em div na tela
+        let myChart = new Chart(
+            document.getElementById(`myChartLine`),
+            config
+        );
+
+    setTimeout(() => atualizarGrafico(1, dados, myChart), 5000);
+
+
+}
+
+function atualizarGrafico(sector, dados, myChart) {
+
+
+
+console.log(sector);
+fetch(`/medidas/tempo-real`, { cache: 'no-store' }).then(function (response) {
+    if (response.ok) {
+        response.json().then(function (novoRegistro) {
+
+            // obterdados(sector);
+            // alertar(novoRegistro, sector);
+            console.log(`Dados recebidos: ${JSON.stringify(novoRegistro)}`);
+            console.log(`Dados atuais do gráfico:`);
+            console.log(dados);
+
+            // let avisoCaptura = document.getElementById(`avisoCaptura${sector}`)
+            // avisoCaptura.innerHTML = ""
+
+
+            if (novoRegistro[0].momento_grafico == dados.labels[dados.labels.length - 1]) {
+                console.log("---------------------------------------------------------------")
+                console.log("Como não há dados novos para captura, o gráfico não atualizará.")
+                // avisoCaptura.innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> Foi trazido o dado mais atual capturado pelo sensor. <br> Como não há dados novos a exibir, o gráfico não atualizará."
+                console.log("Horário do novo dado capturado:")
+                console.log(novoRegistro[0].momento_grafico)
+                console.log("Horário do último dado capturado:")
+                console.log(dados.labels[dados.labels.length - 1])
+                console.log("---------------------------------------------------------------")
+            } else {
+                var dtNova = novoRegistro[0].momento_grafico;
+
+                dtNova = dtNova.slice(0, -3)
+                // tirando e colocando valores no gráfico
+                dados.labels.shift(); // apagar o primeiro
+                dados.labels.push(dtNova); // incluir um novo momento
+
+                // dados.datasets[0].data.shift();  
+                // apagar o primeiro de umidade
+                // dados.datasets[0].data.push(novoRegistro[0].umidade); 
+                // incluir uma nova medida de umidade
+                var TempAtual = novoRegistro[0].temperatura
+                TempAtual -= 10
+
+                tempSpan.innerHTML = TempAtual;
+
+                if(TempAtual > 60){
+                    alert('AJUSTAR SEGUNDO O ANALITYCS')
+                }
+
+                dados.datasets[0].data.shift();  // apagar o primeiro de temperatura
+                dados.datasets[0].data.push(TempAtual);
+                               
+                myChart.update();
+            }
+
+            // Altere aqui o valor em ms se quiser que o gráfico atualize mais rápido ou mais devagar
+            proximaAtualizacao = setTimeout(() => atualizarGrafico(sector, dados, myChart), 5000);
+        });
+    } else {
+        console.error('Nenhum dado encontrado ou erro na API');
+        // Altere aqui o valor em ms se quiser que o gráfico atualize mais rápido ou mais devagar
+        proximaAtualizacao = setTimeout(() => atualizarGrafico(sector, dados, myChart), 5000);
+    }
+})
+    .catch(function (error) {
+        console.error(`Erro na obtenção dos dados p/ gráfico: ${error.message}`);
     });
+
+
+// grafico dois de umidade
+
+
+
+}
 
 </script>
