@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style1.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Umidade | Diwine</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="metricas">
+            <div class="title">
+
+                <div class="id-superior">
+                    ID:01020304
+                </div>
+
+                <div class="base-setor">
+                    SETOR 1- VINHO BRANCO
+                </div>
+
+                <div class="base-temp">
+                    Umidade Atual: 80%
+                </div>
+            </div>
+
+            <div class="grafico">
+                <canvas id="myChartLine"></canvas>
+            </div>
+        </div>
+
+        <div class="info">
+            <div class="header-right">
+                <div class="distance">
+                    <div class="info-right">
+                        Em maturação desde <br>
+                        <b class="dados">05/03/2018</b>
+                    </div>
+                    <div class="info-right">
+                        Tipo do barril <br>
+                        <b class="dados">Madeira de Carvalho</b>
+                    </div>
+                    <div class="info-right">
+                        Tempo de Atualização <br>
+                        <b class="dados">30 Minutos</b>
+                    </div>
+                    <div class="info-right">
+                        Tipo do Vinho <br>
+                        <b class="dados">BRANCO</b>
+                    </div>
+                    <div class="info-right">
+                        Umidade ideal: <br>
+                        <b class="dados">Entre 65% e 80%</b>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <div class="footer-right">
+                <div class="info-right" id="media">
+                    Média de Umidade <br>
+                    <b class="dados">63%</b>
+                </div>
+            </div> -->
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <ul class="menu">
+            <li class="active">
+                <a href="../paginaInicial/dashboardInicial.html" class="menuIcon">
+                    <i class="fas fa-bars active"></i>
+                    <!-- <span>Menu</span> -->
+                </a>
+            </li>
+            <li class="temperatura">
+                <a href="../dashboard_temp/dashteste.html" class="temperaturaIcon">
+                    <i class="fas fa-temperature-three-quarters"></i>
+                    <!-- <span>Temperatura</span> -->
+                </a>
+            </li>
+            <li class="umidade">
+                <a href="../dashboard_umi/dashboardUmi.html" class="umidadeIcon">
+                    <i class="fas fa-droplet"></i>
+                    <!-- <span>Umidade</span> -->
+                </a>
+            </li>
+            <li class="lote">
+                <a href="../inserirLote/lote.html" class="loteIcon">
+                    <i class="fas fa-wine-bottle"></i>
+                    <!-- <span>Lote</span> -->
+                </a>
+            </li>
+
+            <div class="bottom-icon">
+                <!-- <div class="space"></div> -->
+                <li class="logout">
+                    <a href="../../acesso/login.html" class="logoutIcon">
+                        <i class="fas fa-right-from-bracket"></i>
+                        <!-- <span>Logout</span> -->
+                    </a>
+                </li>
+                <li class="perfil">
+                    <a href="../perfilUsuario/Perfil_Usuario.html" class="perfilIcon">
+                        <i class="fas fa-circle-user"></i>
+                        <!-- <span>Perfil</span> -->
+                    </a>
+                </li>
+            </div>
+    </div>
+</body>
+
+</html>
+<script>
+    const ctx = document.getElementById('myChartLine');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['13h00', '13h30', '14h00', '14h30', '15h00', '15h30'],
+            datasets: [{
+                label: '',
+                backgroundColor: 'rgba(93, 95, 239, 1)',
+                borderColor: 'rgba(93, 95, 239, 1)',
+                data: [65, 60, 53, 58, 53],
+                borderWidth: 4,
+                tension: 0.15
+            }]
+        },
+        options: {
+            responsive: true,
+            radius: 6,
+            plugins: {
+                legend: {
+                    labels: {
+                        boxWidth: 0
+
+                    }
+                }
+            },
+
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+</script>
+
+<script>
+       window.onload = obterDadosGrafico();
+    
+
+    // O gráfico é construído com três funções:
+    // 1. obterDadosGrafico -> Traz dados do Banco de Dados para montar o gráfico da primeira vez
+    // 2. plotarGrafico -> Monta o gráfico com os dados trazidos e exibe em tela
+    // 3. atualizarGrafico -> Atualiza o gráfico, trazendo novamente dados do Banco
+
+    // Esta função *obterDadosGrafico* busca os últimos dados inseridos em tabela de medidas.
+    // para, quando carregar o gráfico da primeira vez, já trazer com vários dados.
+    // A função *obterDadosGrafico* também invoca a função *plotarGrafico*
+
+    //     Se quiser alterar a busca, ajuste as regras de negócio em src/controllers
+    //     Para ajustar o "select", ajuste o comando sql em src/models
+    function obterDadosGrafico() {
+
+        fetch(`/dashboard/buscarDadosX`, { cache: 'no-store' }).then(function (response) {
+            if (response.ok) {
+                response.json().then(function (resposta) {
+                    console.log(`Dados recebidos: ${JSON.stringify(resposta)}`);
+                    resposta.reverse();
+
+                    plotarGrafico(resposta);
+
+                });
+            } else {
+                console.error('Nenhum dado encontrado ou erro na API');
+            }
+        })
+            .catch(function (error) {
+                console.error(`Erro na obtenção dos dados p/ gráfico: ${error.message}`);
+            });
+
+    }
+
+    // Esta função *plotarGrafico* usa os dados capturados na função anterior para criar o gráfico
+    // Configura o gráfico (cores, tipo, etc), materializa-o na página e, 
+    // A função *plotarGrafico* também invoca a função *atualizarGrafico*
+    function plotarGrafico(resposta) {
+
+        console.log('iniciando plotagem do gráfico...');
+
+        // Criando estrutura para plotar gráfico - labels
+        let labels = [];
+
+        // Criando estrutura para plotar gráfico - dados
+        let dados = {
+            labels: labels,
+            datasets: [{
+                label: 'NOME DA SUA LABEL',
+                data: [],
+                fill: false,
+                backgroundColor: 'white',
+                borderColor: 'black',
+                tension: 1,
+
+            }
+            ]
+        };
+
+        console.log('----------------------------------------------')
+        console.log('Estes dados foram recebidos pela funcao "obterDadosGrafico" e passados para "plotarGrafico":')
+        console.log(resposta)
+
+        // Inserindo valores recebidos em estrutura para plotar o gráfico
+        for (i = 0; i < resposta.length; i++) {
+            var publicacao = resposta[i];
+            labels.push(publicacao.DadosX);
+            dados.datasets[0].data.push(publicacao.quantidade);
+            
+        }
+
+        console.log('----------------------------------------------')
+        console.log('O gráfico será plotado com os respectivos valores:')
+        console.log('Labels:')
+        console.log(labels)
+        console.log('Dados:')
+        console.log(dados.datasets)
+        console.log('----------------------------------------------')
+
+        // Criando estrutura para plotar gráfico - config
+        const config = {
+            type: 'bar',
+            data: dados,
+            options: {
+                scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+            }
+        };
+
+        // Adicionando gráfico criado em div na tela
+        let myChart = new Chart(
+            document.getElementById(`myChart`),
+            config
+        );
+    }
+    
+</script>
