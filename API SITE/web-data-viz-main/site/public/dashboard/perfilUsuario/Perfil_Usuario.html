@@ -56,20 +56,13 @@
                     <img class="pencilIcon" src="./style/icons/pencilIcon.svg" alt="">
                 </div>
                 <div class="info-pessoal">
-                    <div class="card-id">
-                        CPF: <b class="dado">555.555.555-55</b>
+                  
+                     <div class="card-id">
+                        E-mail:<b class="dado"> jose.silva@diwine.com</b>
                     </div>
 
                     <div class="card-id">
-                        Cargo:<b class="dado">Técnico de Manutenção</b>
-                    </div>
-
-                    <div class="card-id">
-                        E-mail:<b class="dado">jose.silva@diwine.com</b>
-                    </div>
-
-                    <div class="card-id">
-                        Celular: <b class="dado">+55 (11) 94002-8922</b>
+                        Celular: <b class="dado"><span id="numeroTelefone"></span></b>
                     </div>
                 </div>
             </div>
@@ -121,3 +114,22 @@
     </div>
 </body>
 </html>
+
+<script>
+
+function validarSessao() {
+    var email = sessionStorage.EMAIL_USUARIO;
+    var nome = sessionStorage.NOME_USUARIO;
+    var numero = sessionStorage.NUMERO_USUARIO;
+
+    numeroTelefone.innerHTML = numero
+    
+
+    if (email != null && nome != null) {
+        b_usuario.innerHTML = nome;
+    } else {
+        window.location = "../login.html";
+    }
+}
+
+</script>

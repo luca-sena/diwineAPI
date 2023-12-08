@@ -10,11 +10,11 @@
     <title>Tela Inicial | Diwine</title>
 </head>
 
-<body>
+<body onload="validarSessao()">
     <div class="container">
         <div class="rectangle-33">
 
-            <div class="oi"> Olá, José! </div>
+            <div class="oi"> Olá, <span id="nomeUser"></span> </div>
             <div class="selecione"> SELECIONE O AMBIENTE </div>
 
             <div class="ambientes">
@@ -102,3 +102,19 @@
 </body>
 
 </html>
+
+<script>
+    function validarSessao() {
+    var email = sessionStorage.EMAIL_USUARIO;
+    var nome = sessionStorage.NOME_USUARIO;
+
+    nomeUser.innerHTML = nome
+    
+
+    if (email != null && nome != null) {
+        b_usuario.innerHTML = nome;
+    } else {
+        window.location = "../login.html";
+    }
+}
+</script>

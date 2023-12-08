@@ -54,7 +54,7 @@
             },
             body: JSON.stringify({
                 emailServer: emailVar,
-                senhaServer: senhaVar
+                senhaServer: senhaVar,
             })
         }).then(function (resposta) {
             console.log("ESTOU NO THEN DO entrar()!")
@@ -67,6 +67,8 @@
                     console.log(JSON.stringify(json));
                     sessionStorage.EMAIL_USUARIO = json.email;
                     sessionStorage.NOME_USUARIO = json.nome;
+                    sessionStorage.NUMERO_USUARIO = json.numero;
+                    
                    
 
                     setTimeout(function () {
@@ -79,6 +81,7 @@
             } else {
 
                 console.log("Houve um erro ao tentar realizar o login!");
+                alert('Email ou Senha incorrento!')
 
                 resposta.text().then(texto => {
                     console.error(texto);
